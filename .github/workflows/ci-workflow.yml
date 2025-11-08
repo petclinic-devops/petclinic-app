@@ -47,38 +47,50 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 4. Build & push Docker image
+      # 4. Set Docker context and Dockerfile
+      - name: Set Docker context and Dockerfile
+        run: |
+          if [ "${{ matrix.service }}" == "config-server" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-config-server" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-config-server/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "discovery-server" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-discovery-server" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-discovery-server/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "customers-service" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-customers-service" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-customers-service/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "visits-service" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-visits-service" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-visits-service/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "genai-service" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-genai-service" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-genai-service/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "api-gateway" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-api-gateway" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-api-gateway/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "admin-server" ]; then
+            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-admin-server" >> $GITHUB_ENV
+            echo "DOCKER_FILE=petclinic-app/spring-petclinic-admin-server/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "grafana-server" ]; then
+            echo "DOCKER_CONTEXT=./docker/grafana" >> $GITHUB_ENV
+            echo "DOCKER_FILE=./docker/grafana/Dockerfile" >> $GITHUB_ENV
+          elif [ "${{ matrix.service }}" == "prometheus-server" ]; then
+            echo "DOCKER_CONTEXT=./docker/prometheus" >> $GITHUB_ENV
+            echo "DOCKER_FILE=./docker/prometheus/Dockerfile" >> $GITHUB_ENV
+          fi
+
+      # 5. Build & push Docker image
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ${{ 
-            matrix.service == 'config-server' && 'petclinic-app/spring-petclinic-config-server' ||
-            matrix.service == 'discovery-server' && 'petclinic-app/spring-petclinic-discovery-server' ||
-            matrix.service == 'customers-service' && 'petclinic-app/spring-petclinic-customers-service' ||
-            matrix.service == 'visits-service' && 'petclinic-app/spring-petclinic-visits-service' ||
-            matrix.service == 'genai-service' && 'petclinic-app/spring-petclinic-genai-service' ||
-            matrix.service == 'api-gateway' && 'petclinic-app/spring-petclinic-api-gateway' ||
-            matrix.service == 'admin-server' && 'petclinic-app/spring-petclinic-admin-server' ||
-            matrix.service == 'grafana-server' && './docker/grafana' ||
-            matrix.service == 'prometheus-server' && './docker/prometheus'
-          }}
-          file: ${{ 
-            matrix.service == 'config-server' && 'petclinic-app/spring-petclinic-config-server/Dockerfile' ||
-            matrix.service == 'discovery-server' && 'petclinic-app/spring-petclinic-discovery-server/Dockerfile' ||
-            matrix.service == 'customers-service' && 'petclinic-app/spring-petclinic-customers-service/Dockerfile' ||
-            matrix.service == 'visits-service' && 'petclinic-app/spring-petclinic-visits-service/Dockerfile' ||
-            matrix.service == 'genai-service' && 'petclinic-app/spring-petclinic-genai-service/Dockerfile' ||
-            matrix.service == 'api-gateway' && 'petclinic-app/spring-petclinic-api-gateway/Dockerfile' ||
-            matrix.service == 'admin-server' && 'petclinic-app/spring-petclinic-admin-server/Dockerfile' ||
-            matrix.service == 'grafana-server' && './docker/grafana/Dockerfile' ||
-            matrix.service == 'prometheus-server' && './docker/prometheus/Dockerfile'
-          }}
+          context: ${{ env.DOCKER_CONTEXT }}
+          file: ${{ env.DOCKER_FILE }}
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
           cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
           cache-to: type=inline
 
-      # 5. Record deployed tag (chỉ 1 lần)
+      # 6. Record deployed tag (chỉ 1 lần)
       - name: Record deployed tag
         if: matrix.service == 'config-server'
         run: |
