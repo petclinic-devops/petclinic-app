@@ -39,6 +39,7 @@ jobs:
             echo "IMAGE_TAG=v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
           else
             echo "IMAGE_TAG=dev-v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+          fi
 
       # 3. Login Docker Hub
       - name: Log in Docker Hub
@@ -50,34 +51,44 @@ jobs:
       # 4. Set Docker context and Dockerfile
       - name: Set Docker context and Dockerfile
         run: |
-          if [ "${{ matrix.service }}" == "config-server" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-config-server" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-config-server/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "discovery-server" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-discovery-server" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-discovery-server/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "customers-service" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-customers-service" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-customers-service/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "visits-service" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-visits-service" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-visits-service/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "genai-service" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-genai-service" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-genai-service/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "api-gateway" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-api-gateway" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-api-gateway/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "admin-server" ]; then
-            echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-admin-server" >> $GITHUB_ENV
-            echo "DOCKER_FILE=petclinic-app/spring-petclinic-admin-server/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "grafana-server" ]; then
-            echo "DOCKER_CONTEXT=./docker/grafana" >> $GITHUB_ENV
-            echo "DOCKER_FILE=./docker/grafana/Dockerfile" >> $GITHUB_ENV
-          elif [ "${{ matrix.service }}" == "prometheus-server" ]; then
-            echo "DOCKER_CONTEXT=./docker/prometheus" >> $GITHUB_ENV
-            echo "DOCKER_FILE=./docker/prometheus/Dockerfile" >> $GITHUB_ENV
-          fi
+          case "${{ matrix.service }}" in
+            config-server)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-config-server" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-config-server/Dockerfile" >> $GITHUB_ENV
+              ;;
+            discovery-server)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-discovery-server" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-discovery-server/Dockerfile" >> $GITHUB_ENV
+              ;;
+            customers-service)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-customers-service" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-customers-service/Dockerfile" >> $GITHUB_ENV
+              ;;
+            visits-service)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-visits-service" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-visits-service/Dockerfile" >> $GITHUB_ENV
+              ;;
+            genai-service)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-genai-service" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-genai-service/Dockerfile" >> $GITHUB_ENV
+              ;;
+            api-gateway)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-api-gateway" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-api-gateway/Dockerfile" >> $GITHUB_ENV
+              ;;
+            admin-server)
+              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-admin-server" >> $GITHUB_ENV
+              echo "DOCKER_FILE=petclinic-app/spring-petclinic-admin-server/Dockerfile" >> $GITHUB_ENV
+              ;;
+            grafana-server)
+              echo "DOCKER_CONTEXT=./docker/grafana" >> $GITHUB_ENV
+              echo "DOCKER_FILE=./docker/grafana/Dockerfile" >> $GITHUB_ENV
+              ;;
+            prometheus-server)
+              echo "DOCKER_CONTEXT=./docker/prometheus" >> $GITHUB_ENV
+              echo "DOCKER_FILE=./docker/prometheus/Dockerfile" >> $GITHUB_ENV
+              ;;
+          esac
 
       # 5. Build & push Docker image
       - name: Build & push Docker image
