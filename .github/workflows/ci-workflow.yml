@@ -10,104 +10,58 @@ on:
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  VERSION_MAJOR: "1"
+  VERSION_MINOR: "0"
 
 jobs:
-  build-and-push:
+  docker:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [
-          config-server,
-          discovery-server,
-          customers-service,
-          visits-service,
-          genai-service,
-          api-gateway,
-          admin-server,
-          grafana-server,
-          prometheus-server
-        ]
     steps:
-      # 1. Checkout repository
-      - name: Checkout repository
+      # 1. Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Set image tag
-      - name: Set image tag
-        run: |
-          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
-            echo "IMAGE_TAG=v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=dev-v1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
-          fi
+      # 2. Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      # 3. Login Docker Hub
-      - name: Log in Docker Hub
+      # 3. Log in DockerHub
+      - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
 
-      # 4. Set Docker context and Dockerfile
-      - name: Set Docker context and Dockerfile
+      # 4. Set image tag
+      - name: Set image tag
+        id: vars
         run: |
-          case "${{ matrix.service }}" in
-            config-server)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-config-server" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-config-server/Dockerfile" >> $GITHUB_ENV
-              ;;
-            discovery-server)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-discovery-server" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-discovery-server/Dockerfile" >> $GITHUB_ENV
-              ;;
-            customers-service)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-customers-service" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-customers-service/Dockerfile" >> $GITHUB_ENV
-              ;;
-            visits-service)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-visits-service" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-visits-service/Dockerfile" >> $GITHUB_ENV
-              ;;
-            genai-service)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-genai-service" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-genai-service/Dockerfile" >> $GITHUB_ENV
-              ;;
-            api-gateway)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-api-gateway" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-api-gateway/Dockerfile" >> $GITHUB_ENV
-              ;;
-            admin-server)
-              echo "DOCKER_CONTEXT=petclinic-app/spring-petclinic-admin-server" >> $GITHUB_ENV
-              echo "DOCKER_FILE=petclinic-app/spring-petclinic-admin-server/Dockerfile" >> $GITHUB_ENV
-              ;;
-            grafana-server)
-              echo "DOCKER_CONTEXT=./docker/grafana" >> $GITHUB_ENV
-              echo "DOCKER_FILE=./docker/grafana/Dockerfile" >> $GITHUB_ENV
-              ;;
-            prometheus-server)
-              echo "DOCKER_CONTEXT=./docker/prometheus" >> $GITHUB_ENV
-              echo "DOCKER_FILE=./docker/prometheus/Dockerfile" >> $GITHUB_ENV
-              ;;
-          esac
+          RUN_NUMBER=${GITHUB_RUN_NUMBER}
+          BRANCH_NAME=${GITHUB_REF##*/}
+          if [[ "$BRANCH_NAME" == "main" ]]; then
+            IMAGE_TAG="v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$RUN_NUMBER"
+          else
+            IMAGE_TAG="dev-v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$RUN_NUMBER"
+          fi
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "Tag will be $IMAGE_TAG"
 
-      # 5. Build & push Docker image
-      - name: Build & push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: ${{ env.DOCKER_CONTEXT }}
-          file: ${{ env.DOCKER_FILE }}
-          push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
-          cache-to: type=inline
-
-      # 6. Record deployed tag (chỉ 1 lần)
-      - name: Record deployed tag
-        if: matrix.service == 'config-server'
+      # 6. Build & push spring-petclinic-config-server
+      - name: Build & Push spring-petclinic-config-server
         run: |
-          echo "- $IMAGE_TAG" >> deploy-log.md
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-config-server"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./petclinic-app/spring-petclinic-config-server
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 7. Log tag vào deploy-log.md
+      - name: Log image tag
+        run: |
+          echo "## Build $GITHUB_RUN_NUMBER - $(date)" >> deploy-log.md
+          echo "- Branch: ${GITHUB_REF##*/}" >> deploy-log.md
+          echo "- Image Tag: $IMAGE_TAG" >> deploy-log.md
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add deploy-log.md
-          git commit -m "chore: log deployed image tag $IMAGE_TAG [skip ci]"
+          git commit -m "Add deploy log for run $GITHUB_RUN_NUMBER"
           git push
