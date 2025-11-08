@@ -1,0 +1,155 @@
+name: CI Docker Build & Push
+
+on:
+  push:
+    branches:
+      - main          
+      - devops-final
+  workflow_dispatch:
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  VERSION_MAJOR: "1"
+  VERSION_MINOR: "0"
+
+jobs:
+  ci-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Login DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      # 4. Set image tag theo môi trường
+      - name: Set image tag
+        id: vars
+        run: |
+          RUN_NUMBER=${GITHUB_RUN_NUMBER}
+          BRANCH_NAME=${GITHUB_REF##*/}
+
+          if [[ "$BRANCH_NAME" == "main" ]]; then
+            IMAGE_TAG="v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.${RUN_NUMBER}"
+            ENVIRONMENT="production"
+          else
+            IMAGE_TAG="dev-v${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.${RUN_NUMBER}"
+            ENVIRONMENT="development"
+          fi
+
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo " Environment: $ENVIRONMENT"
+          echo " Tag will be: $IMAGE_TAG"
+
+      # 5. Make mvnw executable
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
+      # 6. Build Java project
+      - name: Build Java project
+        run: ./mvnw clean package -DskipTests
+
+      # ===== BUILD & PUSH CÁC SERVICE =====
+      - name: Build & Push spring-petclinic-config-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-config-server"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-config-server
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-discovery-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-discovery-server"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-discovery-server
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-customers-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-customers-service"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-customers-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-visits-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-visits-service"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-visits-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-vets-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-vets-service"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-vets-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-genai-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-genai-service"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-genai-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-api-gateway
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-api-gateway"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-api-gateway
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push spring-petclinic-admin-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-admin-server"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-admin-server
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # ===== HỆ THỐNG MONITORING =====
+      - name: Build & Push grafana-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/grafana-server"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker/grafana
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Build & Push prometheus-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/prometheus-server"
+          echo " Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker/prometheus
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # ===== ZIPKIN =====
+      - name: Run tracing-server (Zipkin)
+        run: |
+          echo "Starting Zipkin tracing server..."
+          docker run -d --name tracing-server -p 9411:9411 openzipkin/zipkin
+          sleep 10
+          docker ps | grep tracing-server
+
+      # ===== LOG DEPLOY =====
+      - name: Save deploy log
+        run: |
+          echo "## Build $GITHUB_RUN_NUMBER - $(date)" >> deploy-log.md
+          echo "- Environment: $ENVIRONMENT" >> deploy-log.md
+          echo "- Branch: ${GITHUB_REF##*/}" >> deploy-log.md
+          echo "- Image Tag: $IMAGE_TAG" >> deploy-log.md
+
+      - name: Upload deploy log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-log
+          path: deploy-log.md
