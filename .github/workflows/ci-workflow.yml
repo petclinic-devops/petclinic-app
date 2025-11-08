@@ -70,7 +70,7 @@ jobs:
           echo "- Image Tag: $IMAGE_TAG" >> deploy-log.md
 
       - name: Upload deploy log as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deploy-log
           path: deploy-log.md
