@@ -14,7 +14,7 @@ env:
   VERSION_MINOR: "0"
 
 jobs:
-  docker:
+  ci-workflow:
     runs-on: ubuntu-latest
     steps:
       # 1. Checkout code
@@ -46,15 +46,15 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           echo "Tag will be $IMAGE_TAG"
 
-    # 4. Make mvnw executable
+      # 5. Make mvnw executable
       - name: Make mvnw executable
         run: chmod +x ./mvnw
 
-    # 4. Build Java project
+      # 6. Build Java project
       - name: Build Java project
         run: ./mvnw clean package -DskipTests
 
-      # 6. Build & push spring-petclinic-config-server
+      # 7. Build & push spring-petclinic-config-server
       - name: Build & Push spring-petclinic-config-server
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-config-server"
@@ -62,7 +62,7 @@ jobs:
           docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-config-server
           docker push $IMAGE_NAME:$IMAGE_TAG
 
-      # 7. Log tag vào deploy-log.md
+      # 8. Log tag vào deploy-log.md
       - name: Save deploy log
         run: |
           echo "## Build $GITHUB_RUN_NUMBER - $(date)" >> deploy-log.md
