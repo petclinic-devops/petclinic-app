@@ -62,7 +62,87 @@ jobs:
           docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-config-server
           docker push $IMAGE_NAME:$IMAGE_TAG
 
-      # 8. Log tag vào deploy-log.md
+      # 8. Build & push spring-petclinic-discovery-server
+      - name: Build & Push spring-petclinic-discovery-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-discovery-server"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-discovery-server
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+     # 9. Build & push spring-petclinic-customers-service
+      - name: Build & Push spring-petclinic-customers-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-customers-service"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-customers-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 10. Build & push spring-petclinic-visits-service
+      - name: Build & Push spring-petclinic-visits-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-visits-service"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-visits-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+     # 11. Build & push spring-petclinic-vets-service
+      - name: Build & Push spring-petclinic-vets-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-vets-service"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-vets-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 12. Build & push spring-petclinic-genai-service
+      - name: Build & Push spring-petclinic-genai-service
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-genai-service"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-genai-service
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 13. Build & push spring-petclinic-api-gateway
+      - name: Build & Push spring-petclinic-api-gateway
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-api-gateway"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-api-gateway
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 14. Run tracing-server (Zipkin)
+      - name: Run tracing-server (Zipkin)
+        run: |
+          echo "Starting Zipkin tracing server..."
+          docker run -d --name tracing-server -p 9411:9411 openzipkin/zipkin
+          sleep 10
+          docker ps | grep tracing-server
+
+      # 15. Build & push spring-petclinic-admin-server
+      - name: Build & Push spring-petclinic-admin-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-admin-server"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-admin-server
+          docker push $IMAGE_NAME:$IMAGE_TAG     
+
+      # 16. Build & Push grafana-server
+      - name: Build & Push grafana-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/grafana-server"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker/grafana
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 17. Build & Push prometheus-server
+      - name: Build & Push prometheus-server
+        run: |
+          IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/prometheus-server"
+          echo "Building $IMAGE_NAME:$IMAGE_TAG"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker/prometheus
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      # 18. Log tag vào deploy-log.md
       - name: Save deploy log
         run: |
           echo "## Build $GITHUB_RUN_NUMBER - $(date)" >> deploy-log.md
