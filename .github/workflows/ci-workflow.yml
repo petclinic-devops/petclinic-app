@@ -64,73 +64,83 @@ jobs:
       - name: Build & Push spring-petclinic-config-server
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-config-server"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-config-server
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-config-server
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-discovery-server
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-discovery-server"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-discovery-server
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-discovery-server
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-customers-service
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-customers-service"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-customers-service
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-customers-service
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-visits-service
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-visits-service"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-visits-service
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-visits-service
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-vets-service
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-vets-service"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-vets-service
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-vets-service
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-genai-service
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-genai-service"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-genai-service
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-genai-service
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-api-gateway
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-api-gateway"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-api-gateway
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-api-gateway
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push spring-petclinic-admin-server
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/spring-petclinic-admin-server"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./spring-petclinic-admin-server
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./spring-petclinic-admin-server
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       # ===== HỆ THỐNG MONITORING =====
       - name: Build & Push grafana-server
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/grafana-server"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker/grafana
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./docker/grafana
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       - name: Build & Push prometheus-server
         run: |
           IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/prometheus-server"
-          echo " Building $IMAGE_NAME:$IMAGE_TAG"
-          docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker/prometheus
+          echo " Building $IMAGE_NAME:$IMAGE_TAG and :latest"
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./docker/prometheus
           docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
 
       # ===== ZIPKIN =====
       - name: Run tracing-server (Zipkin)
