@@ -163,3 +163,19 @@ jobs:
         with:
           name: deploy-log
           path: deploy-log.md
+
+      - name: Send deploy log to Slack
+        run: |
+          echo "Sending deploy log to Slack..."
+          MESSAGE="🚀 *New Deployment Completed* \n• Environment: $ENVIRONMENT \n• Branch: ${GITHUB_REF##*/} \n• Image Tag: $IMAGE_TAG \n• Run Number: $GITHUB_RUN_NUMBER"
+          
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\": \"$MESSAGE\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+
+          echo "\n\n---\n$(cat deploy-log.md)" >> deploy-log.md
+
+          # Gửi nội dung file log đầy đủ (tùy chọn)
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\": \"$(cat deploy-log.md | sed 's/\"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
