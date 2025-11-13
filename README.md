@@ -79,7 +79,6 @@ Tất cả các service được build, test, đóng gói, và lưu trữ trên 
 
 ![CI Workflow](https://github.com/user-attachments/assets/c25b6ace-257e-45c5-8abf-9a0e28e7cba0)
 ![DockerHub Push](https://github.com/user-attachments/assets/06601b71-677b-4530-89e2-c0fc4c68b92b)
-
 **Repository:** [petclinic-app](https://github.com/petclinic-devops/petclinic-app)
 
 ---
@@ -100,6 +99,7 @@ Giai đoạn **Continuous Deployment (CD)** được đảm nhiệm bởi **Jenk
 ### ✅ Kết quả Stage
 - Toàn bộ service được triển khai tự động lên Kubernetes.
 - Jenkins đảm bảo quá trình deploy ổn định, có rollback khi gặp lỗi.
+  
 **Repository:** [petclinic-deploy](https://github.com/petclinic-devops/petclinic-deploy)
 ---
 
