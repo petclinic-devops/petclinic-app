@@ -100,7 +100,7 @@ Giai đoạn **Continuous Deployment (CD)** được đảm nhiệm bởi **Jenk
 ### ✅ Kết quả Stage
 - Toàn bộ service được triển khai tự động lên Kubernetes.
 - Jenkins đảm bảo quá trình deploy ổn định, có rollback khi gặp lỗi.
-
+**Repository:** [petclinic-deploy](https://github.com/petclinic-devops/petclinic-deploy)
 ---
 
 ## 📊 Triển khai Monitoring Service trên Kubernetes bằng Helm
