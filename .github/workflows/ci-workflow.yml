@@ -182,5 +182,7 @@ jobs:
 
       - name: Trigger Jenkins CD pipeline
         run: |
-          echo "Triggering Jenkins CD pipeline..."
-          curl -X POST "http://13.215.183.149:8080/job/CD-petclinic/build?token=ci-to-cd-token&cause=Triggered+by+GitHub+Actions" --fail
+          echo "Triggering Jenkins CD pipeline with credentials..."
+          curl -X POST "http://13.215.183.149:8080/job/CD-petclinic/build?token=ci-to-cd-token&cause=Triggered+by+GitHub+Actions" \
+            --user "admin:${{ secrets.JENKINS_API_TOKEN }}" \
+            --fail
