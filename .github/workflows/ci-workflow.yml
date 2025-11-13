@@ -180,9 +180,15 @@ jobs:
             --data "{\"text\": \"$(cat deploy-log.md | sed 's/\"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
 
+  trigger-cd:
+    needs: ci-workflow
+    if: contains(github.event.head_commit.message, 'trigger jenkins job')
+    runs-on: ubuntu-latest
+    steps:
       - name: Trigger Jenkins CD pipeline
-        run: |
-          echo "Triggering Jenkins CD pipeline with credentials..."
-          curl -X POST "http://13.215.183.149:8080/job/CD-petclinic/build?token=ci-to-cd-token&cause=Triggered+by+GitHub+Actions" \
-            --user "admin:${{ secrets.JENKINS_API_TOKEN }}" \
-            --fail
+        uses: appleboy/jenkins-action@master
+        with:
+          url: "http://13.215.183.149:8080"
+          user: "admin"
+          token: ${{ secrets.JENKINS_API_TOKEN }}
+          job: "CD-petclinic"
