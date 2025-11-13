@@ -179,3 +179,8 @@ jobs:
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\": \"$(cat deploy-log.md | sed 's/\"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Trigger Jenkins CD pipeline
+        run: |
+          echo "Triggering Jenkins CD pipeline..."
+          curl -X POST "http://13.215.183.149:8080/job/CD-petclinic/build?token=ci-to-cdtoken&cause=Triggered+by+GitHub+Actions" --fail
