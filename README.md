@@ -247,6 +247,7 @@ Mỗi bước trong quy trình CI/CD đều có cơ chế gửi **thông báo t�
 
 
 
+
 # Distributed version of the Spring PetClinic Sample Application built with Spring Cloud and Spring AI
 
 [![Build Status](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml)
