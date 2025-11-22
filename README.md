@@ -3,7 +3,6 @@
 ![DevOps Workflow](https://github.com/user-attachments/assets/2eab57f7-468a-4101-b4bd-7a84b2de1da9)
 
 ---
-
 ## 🌐 Infra-provision (Terraform: AWS Infra Setup)
 
 Stage **Infra-provision** chịu trách nhiệm **tự động triển khai hạ tầng AWS** bằng công cụ **Terraform**.
